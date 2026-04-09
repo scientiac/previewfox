@@ -4,6 +4,8 @@ mod profile;
 use clap::Parser;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
 
 #[derive(Parser)]
 #[command(
@@ -26,65 +28,88 @@ struct Cli {
     /// Check that all essential profile files exist and report their status
     #[arg(short = 'H', long)]
     health: bool,
+
+    /// Print detailed information about each step
+    #[arg(short, long)]
+    verbose: bool,
 }
+
+/// Print a message only when verbose mode is enabled.
+macro_rules! info {
+    ($verbose:expr, $($arg:tt)*) => {
+        if $verbose {
+            eprintln!($($arg)*);
+        }
+    };
+}
+
+pub(crate) use info;
 
 fn main() {
     let cli = Cli::parse();
+    let verbose = cli.verbose;
 
     // --health: check and report, then exit
     if cli.health {
-        let ok = profile::health_check();
+        info!(verbose, "[previewfox] Running health check...");
+        let ok = profile::health_check(verbose);
         std::process::exit(if ok { 0 } else { 1 });
     }
 
     // --rebuild: nuke and recreate the profile
     let profile_dir = if cli.rebuild {
-        profile::rebuild()
+        info!(verbose, "[previewfox] Rebuild requested — removing old profile...");
+        profile::rebuild(verbose)
     } else {
-        profile::create_profile()
+        info!(verbose, "[previewfox] Ensuring profile exists...");
+        profile::create_profile(verbose)
     };
 
     // Launch Firefox
-    let mut child = firefox::launch(&cli.url, &profile_dir);
-    let child_id = child.id();
+    info!(verbose, "[previewfox] Launching Firefox with URL: {}", cli.url);
+    info!(verbose, "[previewfox] Profile directory: {}", profile_dir.display());
+    let mut child = firefox::launch(&cli.url, &profile_dir, verbose);
 
-    // Set up Ctrl+C / signal handler to kill Firefox when we exit
+    // Set up Ctrl+C / signal handler to request shutdown
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
 
     ctrlc::set_handler(move || {
-        eprintln!("\nInterrupt received, shutting down Firefox...");
         r.store(false, Ordering::SeqCst);
-
-        // Kill the Firefox process
-        #[cfg(unix)]
-        {
-            // Send SIGTERM on Unix
-            unsafe {
-                libc::kill(child_id as i32, libc::SIGTERM);
-            }
-        }
-
-        #[cfg(not(unix))]
-        {
-            // On Windows, we can't easily send signals — use taskkill
-            let _ = std::process::Command::new("taskkill")
-                .args(["/PID", &child_id.to_string(), "/T", "/F"])
-                .output();
-        }
     })
     .expect("Failed to set Ctrl+C handler");
 
-    // Wait for Firefox to exit
-    match child.wait() {
-        Ok(status) => {
-            if !status.success() && running.load(Ordering::SeqCst) {
-                // Only report non-zero exit if we didn't trigger the kill ourselves
-                eprintln!("Firefox exited with status: {status}");
-            }
+    info!(verbose, "[previewfox] Firefox is running (PID: {}). Press Ctrl+C to stop.", child.id());
+
+    // Poll loop: check if Firefox exited or if we got a signal
+    loop {
+        // Check if Ctrl+C was pressed
+        if !running.load(Ordering::SeqCst) {
+            info!(verbose, "\n[previewfox] Interrupt received, shutting down Firefox...");
+            let _ = child.kill();
+            let _ = child.wait();
+            info!(verbose, "[previewfox] Firefox terminated. Goodbye!");
+            break;
         }
-        Err(e) => {
-            eprintln!("Error waiting for Firefox: {e}");
+
+        // Check if Firefox exited on its own
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                if status.success() {
+                    info!(verbose, "[previewfox] Firefox exited normally.");
+                } else {
+                    info!(verbose, "[previewfox] Firefox exited with status: {status}");
+                }
+                break;
+            }
+            Ok(None) => {
+                // Still running, sleep briefly to avoid busy-waiting
+                thread::sleep(Duration::from_millis(100));
+            }
+            Err(e) => {
+                info!(verbose, "[previewfox] Error checking Firefox status: {e}");
+                break;
+            }
         }
     }
 }

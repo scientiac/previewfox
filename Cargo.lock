@@ -253,7 +253,6 @@ dependencies = [
  "clap",
  "ctrlc",
  "dirs",
- "libc",
 ]
 
 [[package]]
