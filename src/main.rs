@@ -17,7 +17,7 @@ use std::time::Duration;
     version
 )]
 struct Cli {
-    /// URL to open in the preview window (defaults to about:logo)
+    /// URL to open in the preview window
     #[arg(default_value = "about:logo")]
     url: String,
 
