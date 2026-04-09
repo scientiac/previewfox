@@ -1,0 +1,18 @@
+[package]
+name = "previewfox"
+version = "0.1.0"
+edition = "2024"
+authors = [ "scientiac < iac@scientiac.space >" ]
+description = "A script to change firefox UI to have no components, just the content view, made for live previews."
+readme = "README.md"
+repository = "https://github.com/scientiac/previewfox"
+homepage = "https://github.com/scientiac/previewfox"
+license = "GPL-3.0"
+
+[dependencies]
+clap = { version = "4.6.0", features = ["derive"] }
+dirs = "6.0"
+ctrlc = "3.4"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

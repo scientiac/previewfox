@@ -1,0 +1,11 @@
+#TabsToolbar,
+#nav-bar,
+#urlbar-container,
+#PersonalToolbar,
+#navigator-toolbox,
+#titlebar {
+    visibility: collapse !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+}
