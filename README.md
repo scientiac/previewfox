@@ -7,9 +7,9 @@ Launch Firefox with no UI chrome, just the content view. Made for live previews.
 
 ## Why?
 
-When working on web projects, I want a browser window that shows only the page content without tabs, toolbars, bookmarks, or sidebars getting in the way. A clean content-only view for live-previewing designs, kiosk setups, or embedded displays.
+When working on `typst` documents, I want a browser window that shows only the page content without tabs, toolbars, bookmarks, or sidebars getting in the way. A clean content-only view could also be used for live-previewing designs or kiosk setups.
 
-PreviewFox creates a minimal Firefox profile that strips away all UI elements and opens a URL in a clean window. When you close previewfox, Firefox closes with it.
+`previewfox` creates a minimal Firefox profile that strips away all UI elements and opens a URL in a clean window. When you close `previewfox`, Firefox closes with it. (By Firefox I mean the custom Firefox window generated for preview and not your browser.)
 
 ## Usage
 
