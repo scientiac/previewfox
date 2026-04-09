@@ -1,6 +1,6 @@
 [package]
 name = "previewfox"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
 authors = [ "scientiac < iac@scientiac.space >" ]
 description = "A script to change firefox UI to have no components, just the content view, made for live previews."
