@@ -45,3 +45,4 @@ Requires Firefox to be installed and accessible on your PATH.
 This could very well be done with a bash script and you can use `previewfox.sh` instead of the binary if you prefer that.
 
 `cargo` makes it easier to distribute the binary and since I use it for ``typst`` I can just install everything I need using just `cargo`.
+Also, I don't know `powershell` or use it, so rust makes it easier to ship this script to windows, though I am not sure if defender lets you use it.
