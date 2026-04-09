@@ -88,7 +88,7 @@ fn main() {
             info!(verbose, "\n[previewfox] Interrupt received, shutting down Firefox...");
             let _ = child.kill();
             let _ = child.wait();
-            info!(verbose, "[previewfox] Firefox terminated. Goodbye!");
+            info!(verbose, "[previewfox] Firefox terminated.");
             break;
         }
 

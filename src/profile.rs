@@ -17,7 +17,7 @@ const CUSTOM_KEYS_JSON: &str = include_str!("assets/customkeys.json");
 pub fn profile_dir() -> PathBuf {
     dirs::cache_dir()
         .expect("Could not determine cache directory for your platform")
-        .join("ff-previewer-profile")
+        .join("previewfox")
 }
 
 /// Creates the minimal Firefox profile if it doesn't already exist.
