@@ -40,6 +40,14 @@ cargo install previewfox
 
 Requires Firefox to be installed and accessible on your PATH.
 
+## Showcase
+
+![Typst Preview](images/previewfox-typst.png)
+
+| Site Verbose | Default |
+| :----: | :----: |
+| ![Site Verbose](images/previewfox-verbose.png) | ![Default](images/previewfox-default.png) |
+
 ## Don't wan't to install a binary?
 
 This could very well be done with a bash script and you can use `previewfox.sh` instead of the binary if you prefer that.
